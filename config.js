@@ -1,7 +1,7 @@
   // Don't commit this file to your public repos. This config is for first-run
   //
  exports.creds = {
- 	returnURL: 'http://localhost:3000/auth/openid/return',
+ 	returnURL: 'https://edisga-openid.azurewebsites.net/auth/openid/return',
  	identityMetadata: 'https://login.microsoftonline.com/edisga.onmicrosoft.com/.well-known/openid-configuration', // For using Microsoft you should never need to change this.
  	clientID: 'bb6f5582-b837-4837-85d7-09bd70f42034',
  	clientSecret: 'FeVjtlIWXE9KAT+HhHg0qL5jaLnZ3bMAJO1ZzfXIXxQ=', // if you are doing code or id_token code
