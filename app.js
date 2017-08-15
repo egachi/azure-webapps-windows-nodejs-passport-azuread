@@ -48,11 +48,11 @@ var log = bunyan.createLogger({
 //   this will be as simple as storing the user ID when serializing, and finding
 //   the user by ID when deserializing.
 passport.serializeUser(function(user, done) {
-  done(null, user.email);
+  done(null, user.oid);
 });
 
-passport.deserializeUser(function(id, done) {
-  findByEmail(id, function (err, user) {
+passport.deserializeUser(function(oid, done) {
+  findByOid(oid, function (err, user) {
     done(err, user);
   });
 });
@@ -60,11 +60,11 @@ passport.deserializeUser(function(id, done) {
 // array to hold logged in users
 var users = [];
 
-var findByEmail = function(email, fn) {
+var findByOid = function(oid, fn) {
   for (var i = 0, len = users.length; i < len; i++) {
     var user = users[i];
    log.info('we are using user: ', user);
-    if (user.email === email) {
+    if (user.oid === oid) {
       return fn(null, user);
     }
   }
@@ -77,7 +77,7 @@ var findByEmail = function(email, fn) {
 //   credentials (in this case, an OpenID identifier), and invoke a callback
 //   with a user object.
 passport.use(new OIDCStrategy({
-    callbackURL: config.creds.returnURL,
+    redirectUrl: config.creds.returnURL,
     realm: config.creds.realm,
     clientID: config.creds.clientID,
     clientSecret: config.creds.clientSecret,
@@ -85,15 +85,16 @@ passport.use(new OIDCStrategy({
     identityMetadata: config.creds.identityMetadata,
     skipUserProfile: config.creds.skipUserProfile,
     responseType: config.creds.responseType,
-    responseMode: config.creds.responseMode
+    responseMode: config.creds.responseMode,
+    allowHttpForRedirectUrl: config.creds.allowHttpForRedirectUrl,
   },
   function(iss, sub, profile, accessToken, refreshToken, done) {
-    if (!profile.email) {
+    if (!profile.oid) {
       return done(new Error("No email found"), null);
     }
     // asynchronous verification, for effect...
     process.nextTick(function () {
-      findByEmail(profile.email, function(err, user) {
+      findByOid(profile.oid, function(err, user) {
         if (err) {
           return done(err);
         }
@@ -190,7 +191,8 @@ app.get('/logout', function(req, res){
 });
 
 
-app.listen(3000);
+var port = process.env.PORT || 3000;
+app.listen(port);
 
 
 // Simple route middleware to ensure user is authenticated. (Section 4)
